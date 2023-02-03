@@ -23,18 +23,18 @@ async fn run(server: &str, port: u16, certificate_path: &Path) -> Result<Infalli
         .or_else(|_| Certificate::from_pem(&certificate))
         .context("Failed to parse certificate")?;
 
-    let connector: tokio_native_tls::TlsConnector = TlsConnector::builder()
+    let _connector: tokio_native_tls::TlsConnector = TlsConnector::builder()
         .add_root_certificate(certificate)
         .build()
         .context("Failed to create connector")?
         .into();
 
     let stream = TcpStream::connect((server, port)).await?;
-    let stream = BufReader::new(stream);
-    let mut stream = connector
+    let mut stream = BufReader::new(stream);
+    /*let mut stream = connector
         .connect(server, stream)
         .await
-        .context("Failed to connect")?;
+        .context("Failed to connect")?;*/
 
     log::info!("Connected to {}:{}", server, port);
 

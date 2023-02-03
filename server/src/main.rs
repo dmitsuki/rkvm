@@ -16,7 +16,7 @@ use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use tokio::time;
-use tokio_native_tls::native_tls::{Identity, TlsAcceptor};
+
 
 async fn handle_connection<T>(
     mut stream: T,
@@ -56,17 +56,17 @@ where
 async fn run(
     listen_address: SocketAddr,
     switch_keys: &HashSet<Key>,
-    identity_path: &Path,
-    identity_password: &str,
+//    identity_path: &Path,
+//    identity_password: &str,
 ) -> Result<Infallible, Error> {
-    let identity = fs::read(identity_path)
+/*    let identity = fs::read(identity_path)
         .await
         .context("Failed to read identity")?;
     let identity =
         Identity::from_pkcs12(&identity, identity_password).context("Failed to parse identity")?;
     let acceptor: tokio_native_tls::TlsAcceptor = TlsAcceptor::new(identity)
         .context("Failed to create TLS acceptor")
-        .map(Into::into)?;
+        .map(Into::into)?;*/
     let listener = TcpListener::bind(listen_address).await?;
 
     log::info!("Listening on {}", listen_address);
@@ -82,14 +82,14 @@ async fn run(
                 }
             };
 
-            let stream = match acceptor.accept(stream).await {
+/*            let stream = match acceptor.accept(stream).await {
                 Ok(stream) => stream,
                 Err(err) => {
                     log::error!("{}: TLS error: {}", address, err);
                     continue;
                 }
             };
-
+*/
             let (sender, receiver) = mpsc::unbounded_channel();
             if client_sender.send(Ok(sender)).is_err() {
                 return;
@@ -195,7 +195,7 @@ async fn main() {
     };
 
     tokio::select! {
-        result = run(config.listen_address, &config.switch_keys, &config.identity_path, &config.identity_password) => {
+        result = run(config.listen_address, &config.switch_keys) => {
             if let Err(err) = result {
                 log::error!("Error: {:#}", err);
                 process::exit(1);
