@@ -13,10 +13,10 @@ use tokio::fs;
 use tokio::io::BufReader;
 use tokio::net::TcpStream;
 use tokio::time;
-use tokio_native_tls::native_tls::{Certificate, TlsConnector};
+//use tokio_native_tls::native_tls::{Certificate, TlsConnector};
 
-async fn run(server: &str, port: u16, certificate_path: &Path) -> Result<Infallible, Error> {
-    let certificate = fs::read(certificate_path)
+async fn run(server: &str, port: u16) -> Result<Infallible, Error> {
+    /*let certificate = fs::read(certificate_path)
         .await
         .context("Failed to read certificate")?;
     let certificate = Certificate::from_der(&certificate)
@@ -27,7 +27,7 @@ async fn run(server: &str, port: u16, certificate_path: &Path) -> Result<Infalli
         .add_root_certificate(certificate)
         .build()
         .context("Failed to create connector")?
-        .into();
+        .into();*/
 
     let stream = TcpStream::connect((server, port)).await?;
     let mut stream = BufReader::new(stream);
@@ -101,7 +101,7 @@ async fn main() {
     };
 
     tokio::select! {
-        result = run(&config.server.hostname, config.server.port, &config.certificate_path) => {
+        result = run(&config.server.hostname, config.server.port) => {
             if let Err(err) = result {
                 log::error!("Error: {:#}", err);
                 process::exit(1);
